@@ -35,8 +35,8 @@ void GameEngine::run() {
     {
         // handle events
         handleEvents();
-
-        graphics->render(game_logic->getBoardArray());
+        
+        graphics->render(game_logic->getBoardArray(), game_logic->getState());
     }
 		
 }

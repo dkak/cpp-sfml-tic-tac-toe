@@ -2,6 +2,8 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
+#include "GameState.h"
+
 class Graphics {
     private:
         static constexpr unsigned int WINDOW_WIDTH = 600;
@@ -21,6 +23,6 @@ class Graphics {
         void drawX(float size, float width, float position_x, float position_y);
         void drawO(float size, float width, float position_x, float position_y);
         void drawBoard(const char* board, float size, float width);
-        void drawWinningLine(float size, float width, float position_x, float position_y, float angle, float scale);
-        void render(const char* board);
+        void drawWinningLine(float position_x, float position_y, float angle, float scale);
+        void render(const char* board,GameState state);
 };

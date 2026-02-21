@@ -1,5 +1,7 @@
 #include "Graphics.h"
 
+#include <iostream>
+
 Graphics::Graphics() : window(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), "Tic Tac Toe")
 {}
 
@@ -53,15 +55,15 @@ void Graphics::drawX(float size, float width, float position_x, float position_y
 	window.draw(line);
 }
 
-void Graphics::drawWinningLine(float size, float width, float position_x, float position_y, float angle, float scale)
+void Graphics::drawWinningLine(float position_x, float position_y, float angle, float scale)
 {
-	sf::RectangleShape line;
-	line.setSize({ size * scale,width });
-	line.setOrigin({ line.getGeometricCenter() });
-	line.setFillColor(sf::Color::White);
-	line.setPosition({ position_x,position_y });
-	line.setRotation(sf::degrees(angle));
-	window.draw(line);
+	//sf::RectangleShape line;
+	//line.setSize({ size * scale,width });
+	//line.setOrigin({ line.getGeometricCenter() });
+	//line.setFillColor(sf::Color::White);
+	//line.setPosition({ position_x,position_y });
+	//line.setRotation(sf::degrees(angle));
+	//window.draw(line);
 }
 
 void Graphics::drawBoard(const char board[9],float size,float width) {
@@ -93,7 +95,7 @@ void Graphics::drawBoard(const char board[9],float size,float width) {
 	}
 }
 
-void Graphics::render(const char* board)
+void Graphics::render(const char* board,GameState state)
 {
 	// size of window
 	float window_w = window.getView().getSize().x;
@@ -112,6 +114,9 @@ void Graphics::render(const char* board)
 	this->drawGrid(space, width / 4, window_w / 2, window_h / 2);
 
 	this->drawBoard(board,size,width);
+
+	if (state != GameState::Playing) std::cout << "WONN";
+	//this->drawWinningLine(window_w/2,window_h/2, );
 
 	this->display();
 }
