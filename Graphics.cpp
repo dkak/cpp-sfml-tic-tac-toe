@@ -1,8 +1,10 @@
 #include "Graphics.h"
 
+
 #include <iostream>
 
-Graphics::Graphics() : window(sf::VideoMode({ WINDOW_WIDTH, WINDOW_HEIGHT }), "Tic Tac Toe")
+
+Graphics::Graphics() : window(sf::VideoMode({ Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT }), "Tic Tac Toe")
 {}
 
 sf::RenderWindow& Graphics::getWindow() {
@@ -36,7 +38,7 @@ void Graphics::drawO(float size, float width, float position_x, float position_y
 	circle.setRadius(size / 2);
 	circle.setOrigin(circle.getGeometricCenter());
 	circle.setFillColor(sf::Color::Transparent);
-	circle.setOutlineColor(sf::Color(0, 170, 255));
+	circle.setOutlineColor(Config::O_COLOR);
 	circle.setOutlineThickness(-width);
 	circle.setPosition({ position_x,position_y });
 	window.draw(circle);
@@ -47,7 +49,7 @@ void Graphics::drawX(float size, float width, float position_x, float position_y
 	sf::RectangleShape line;
 	line.setSize({ size,width });
 	line.setOrigin(line.getGeometricCenter());
-	line.setFillColor(sf::Color(170, 255, 0));
+	line.setFillColor(Config::X_COLOR);
 	line.setPosition({ position_x,position_y });
 	line.setRotation(sf::degrees(45.f));
 	window.draw(line);
@@ -55,15 +57,15 @@ void Graphics::drawX(float size, float width, float position_x, float position_y
 	window.draw(line);
 }
 
-void Graphics::drawWinningLine(float position_x, float position_y, float angle, float scale)
+void Graphics::drawWinningLine(float size, float width,float position_x, float position_y, float angle, float scale,sf::Color outline_color)
 {
-	//sf::RectangleShape line;
-	//line.setSize({ size * scale,width });
-	//line.setOrigin({ line.getGeometricCenter() });
-	//line.setFillColor(sf::Color::White);
-	//line.setPosition({ position_x,position_y });
-	//line.setRotation(sf::degrees(angle));
-	//window.draw(line);
+	sf::RectangleShape line;
+	line.setSize({ size * scale,width });
+	line.setOrigin({ line.getGeometricCenter() });
+	line.setFillColor(outline_color);
+	line.setPosition({ position_x,position_y });
+	line.setRotation(sf::degrees(angle));
+	window.draw(line);
 }
 
 void Graphics::drawBoard(const char board[9],float size,float width) {
@@ -86,10 +88,10 @@ void Graphics::drawBoard(const char board[9],float size,float width) {
 		float centerX = (col * cell_w) + (cell_w / 2.0f);
 		float centerY = (row * cell_h) + (cell_h / 2.0f);
 
-		if (board[i] == 'X') {
+		if (board[i] == Config::SYMBOL_X) {
 			drawX(size, width, centerX, centerY);
 		}
-		else if (board[i] == 'O') {
+		else if (board[i] == Config::SYMBOL_O) {
 			drawO(size, width, centerX, centerY);
 		}
 	}
@@ -115,8 +117,30 @@ void Graphics::render(const char* board,GameState state)
 
 	this->drawBoard(board,size,width);
 
-	if (state != GameState::Playing) std::cout << "WONN";
-	//this->drawWinningLine(window_w/2,window_h/2, );
+	// game over scenarios
+	switch (state) {
+		case GameState::X_Wins:
+		{
+			//this->drawWinningLine(window_w / 2, window_h / 2, );
+		}
+		case GameState::O_Wins:
+		{
+			//this->drawWinningLine(window_w / 2, window_h / 2, );
+		}
+		case GameState::Draw:
+		{
+			// draw screen draw
+		}
+		default:
+			break;
+
+
+			// DrawWinningLine(space*3, width/2 , window_w/2, window_h/2, -45.f, 1.4f);
+			// DrawWinningLine(space*3, width/2 , window_w/2, window_h/2, 45.f, 1.4f);
+
+			// DrawWinningLine(space*3, width/2 , window_w/2, window_h/2+200.f*(i-1), 0.f);
+			// DrawWinningLine(space*3, width/2 , window_w/2+200.f*(i-1), window_h/2, 90.f);
+	}
 
 	this->display();
 }

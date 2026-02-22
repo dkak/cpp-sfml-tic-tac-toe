@@ -6,6 +6,7 @@
 #include "Computer.h"
 #include "Graphics.h"
 
+
 GameEngine::GameEngine(Player* player_x, Player* player_o,bool running)
 {
     this->player_x = player_x;
@@ -28,22 +29,33 @@ GameEngine::~GameEngine()
 }
 
 void GameEngine::run() {
-
-
-	// while window is still open
+    
+    sf::Clock clock;
+    bool stats_updated = false;
+    
+    // while window is still open
     while (graphics->getWindow().isOpen() && this->running)
     {
+        float dt = clock.restart().asSeconds();
+        
         // handle events
         handleEvents();
-        
+
+        // handle the animation logic
+        update(dt);
+
         graphics->render(game_logic->getBoardArray(), game_logic->getState());
+        
+        //if (game_logic->getState() != GameState::Playing && !stats_updated) 
+        //{
+        //    updateGameStats(game_logic->getState());
+        //    stats_updated = true;
+        //}
     }
-		
 }
 
-void GameEngine::handleEvents() {
-
-
+void GameEngine::handleEvents()
+{
     while (std::optional event = graphics->getWindow().pollEvent())
     {
 
@@ -54,12 +66,24 @@ void GameEngine::handleEvents() {
             graphics->getWindow().close();
             this->running = false;
         }
+
         // when window is resized
         else if (event->is <sf::Event::Resized>())
         {
             // update view
             sf::View view(sf::FloatRect({ 0.f, 0.f }, sf::Vector2f(graphics->getWindow().getSize())));
             graphics->getWindow().setView(view);
+        }
+
+        // when game is over wait for user's choice
+        else if (game_logic->getState() != GameState::Playing) {
+            if (auto* mouse = event->getIf<sf::Event::MouseButtonPressed>()) {
+                if (mouse->button == sf::Mouse::Button::Left) {
+                    // Process move logic here...
+                    // processMove(mouse->position);
+                    std::cout << "Game Over";
+                }
+            }
         }
 
         // when mouse button is pressed
@@ -76,16 +100,51 @@ void GameEngine::handleEvents() {
                 // Map the pixel to the current view coordinates
                 sf::Vector2f worldPos = graphics->getWindow().mapPixelToCoords(mouse->position);
 
-                
+
                 int col = static_cast<int>(worldPos.x / cell_w);
                 int row = static_cast<int>(worldPos.y / cell_h);
                 if (col >= 0 && col < 3 && row >= 0 && row < 3) {
                     int index = (row * 3) + col;
                     game_logic->move(index);
                 }
-                
+
             }
         }
     }
+}
 
+void GameEngine::updateGameStats(GameState state) 
+{
+    game_logic->incrementGamesPlayed();
+    switch (state) {
+        case GameState::X_Wins:
+        {
+            player_x->incrementWins();
+        }
+        case GameState::O_Wins:
+        {
+            player_o->incrementWins();
+        }
+        default:
+            break;
+    }
+}
+
+void GameEngine::updateEndSequence(float dt, GameState state) {
+    if (endStage == EndSequence::None) endStage = EndSequence::DrawingLine;
+
+    switch (endStage) {
+        case EndSequence::DrawingLine:
+            lineProgress += dt * 2.0f;
+            if (lineProgress >= 1.0f) {
+                lineProgress = 1.0f;
+                timer += dt;
+                if (timer > 0.5f) { endStage = EndSequence::ShowingMessage; timer = 0.0f; }
+            }
+            break;
+        case EndSequence::ShowingMessage:
+            timer += dt;
+            if (timer > 1.5f) endStage = EndSequence::ShowingMenu;
+            break;
+    }
 }
