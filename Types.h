@@ -2,7 +2,20 @@
 
 // 1. Enums
 enum class GameState { Playing, X_Wins, O_Wins, Draw };
-enum class EndSequence { None, DrawingLine, ShowingMessage, ShowingMenu };
+enum class EndingTransitionSequence { None, DrawingLine, ShowingMessage, ShowingMenu };
+
+
+struct WinInfo {
+    bool is_completed = false;
+    int positions[3];
+};
+
+struct GameStats{
+    int wins_x = 0;
+    int wins_o = 0;
+    int draws = 0;
+    int total_games = 0;
+};
 
 // 2. Constants
 namespace Config {

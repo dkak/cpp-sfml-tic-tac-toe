@@ -1,21 +1,10 @@
 #include <iostream>
 
 #include "Game.h"
-#include "Player.h"
-#include "Human.h"
-#include "Computer.h"
-#include "Graphics.h"
-
 
 Game::Game()
 {
-    this->symbol = Config::SYMBOL_X;
-    this->initializeBoard();
-    this->games_played = 0;
-}
-
-int Game::getGamesPlayed() {
-    return this->games_played;
+    this->initializeGame();
 }
 
 char* Game::getBoardArray()
@@ -23,31 +12,51 @@ char* Game::getBoardArray()
     return board;
 }
 
-void Game::incrementGamesPlayed() {
-    games_played++;
+void Game::updateGameStats() 
+{
+    if (getState() == GameState::Playing) return;
+
+    game_stats.total_games++;
+
+    switch (getState()) {
+        case GameState::X_Wins:
+            game_stats.wins_x++;
+            break;
+        
+        case GameState::O_Wins:
+            game_stats.wins_o++;
+            break;
+        default:
+            game_stats.draws++;
+            break;
+    }
 }
 
 void Game::initializeGame() {
-    games_played = 0;
+    
     symbol = Config::SYMBOL_X;
-}
-
-void Game::initializeBoard() {
     for (int i = 0; i < Config::BOARD_SIZE; i++) {
         this->board[i] = ' ';
     }
+
 }
 
 bool Game::hasWon(char symbol) {
     for (auto& comb : Config::WINNING_COMB) {
         if (this->board[comb[0]] == symbol && this->board[comb[1]]==symbol && this->board[comb[2]] == symbol) {
+            win_info.positions[0] = comb[0];
+            win_info.positions[1] = comb[1];
+            win_info.positions[2] = comb[2];
+            win_info.is_completed = true;
             return true;
         }
     }
     return false;
 }
 
-bool Game::isTie() {
+bool Game::isTie() 
+{
+    if (hasWon(Config::SYMBOL_X) || hasWon(Config::SYMBOL_O)) return false;
     for (int i = 0; i < Config::BOARD_SIZE; i++) {
         if (this->board[i] == ' ') return false;
     }
@@ -67,4 +76,13 @@ void Game::move(int position)
         board[position] = symbol;
         symbol = symbol == Config::SYMBOL_X ? Config::SYMBOL_O : Config::SYMBOL_X;
     }
+}
+
+GameStats Game::getGameStats() 
+{
+    return this->game_stats;
+}
+
+WinInfo Game::getWinInfo() {
+    return win_info;
 }

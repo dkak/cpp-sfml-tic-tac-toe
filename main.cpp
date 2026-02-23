@@ -8,7 +8,7 @@ int main() {
     Player* p1 = new Human('X');
     Player* p2 = new Computer('O');
 
-    GameEngine game_engine(p1, p2,true);
+    GameEngine game_engine(p1, p2);
 
     game_engine.run();
 

@@ -10,17 +10,18 @@
 
 class Game {
 private:
-    int games_played;
     char board[Config::BOARD_SIZE];
     char symbol;
+    GameStats game_stats;
+    WinInfo win_info;
 
-    int getGamesPlayed();
 public:
     Game();
     char* getBoardArray();
-    void incrementGamesPlayed();
+    GameStats getGameStats();
+    WinInfo getWinInfo();
+    void updateGameStats();
     void initializeGame();
-    void initializeBoard();
     bool hasWon(char symbol);
     bool isTie();
     GameState getState();

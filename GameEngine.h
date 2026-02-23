@@ -10,19 +10,15 @@ private:
     Game* game_logic;
     Player* player_x;
     Player* player_o;
-    bool running;
+    EndingTransitionSequence transition_state;
+    float transition_timer;
 
-    // Not sure
-    EndSequence endStage = EndSequence::None;
-    float timer = 0.0f;
-    float lineProgress = 0.0f;
-
+    void updateGameStats();
+    void updateTransition(float dt);
     void handleEvents();
-    void update();
-    void updateGameStats(GameState state);
-    void updateEndSequence(float dt, GameState state);
+    
 public:
-    GameEngine(Player* player_x, Player* player_o,bool running);
+    GameEngine(Player* player_x, Player* player_o);
     ~GameEngine();
     void run();
 };

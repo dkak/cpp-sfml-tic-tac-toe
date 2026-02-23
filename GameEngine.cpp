@@ -7,13 +7,14 @@
 #include "Graphics.h"
 
 
-GameEngine::GameEngine(Player* player_x, Player* player_o,bool running)
+GameEngine::GameEngine(Player* player_x, Player* player_o)
 {
     this->player_x = player_x;
     this->player_o = player_o;
-    this->running = running;
     this->graphics=new Graphics();
     this->game_logic = new Game();
+    this->transition_state= EndingTransitionSequence::None;
+    transition_timer = 0.0f;
 }
 
 GameEngine::~GameEngine()
@@ -28,29 +29,52 @@ GameEngine::~GameEngine()
     this->game_logic = nullptr;
 }
 
+void GameEngine::updateGameStats()
+{
+    game_logic->updateGameStats();
+}
+
+void GameEngine::updateTransition(float dt) {
+
+    if (transition_state == EndingTransitionSequence::None) return;
+
+    transition_timer += dt;
+    switch (transition_state) {
+        case EndingTransitionSequence::DrawingLine:
+            if (transition_timer >= 0.5f) {
+                transition_state = EndingTransitionSequence::ShowingMessage;
+                transition_timer = 0.0f;
+            }
+            break;
+        case EndingTransitionSequence::ShowingMessage:
+            if (transition_timer >= 1.0f) {
+                transition_state = EndingTransitionSequence::ShowingMenu;
+                transition_timer = 0.0f;
+            }
+            break;
+        default:
+            break;
+    }
+}
+
 void GameEngine::run() {
     
     sf::Clock clock;
     bool stats_updated = false;
     
     // while window is still open
-    while (graphics->getWindow().isOpen() && this->running)
+    while (graphics->getWindow().isOpen())
     {
         float dt = clock.restart().asSeconds();
         
         // handle events
         handleEvents();
 
-        // handle the animation logic
-        update(dt);
+        // handle the closing animation logic
+        updateTransition(dt);
 
-        graphics->render(game_logic->getBoardArray(), game_logic->getState());
+        graphics->render(game_logic->getBoardArray(), game_logic->getState(), transition_state, transition_timer,game_logic->getGameStats(),game_logic->getWinInfo());
         
-        //if (game_logic->getState() != GameState::Playing && !stats_updated) 
-        //{
-        //    updateGameStats(game_logic->getState());
-        //    stats_updated = true;
-        //}
     }
 }
 
@@ -58,13 +82,11 @@ void GameEngine::handleEvents()
 {
     while (std::optional event = graphics->getWindow().pollEvent())
     {
-
         // when close button is clicked
         if (event->is<sf::Event::Closed>())
         {
             // close window
             graphics->getWindow().close();
-            this->running = false;
         }
 
         // when window is resized
@@ -75,8 +97,11 @@ void GameEngine::handleEvents()
             graphics->getWindow().setView(view);
         }
 
-        // when game is over wait for user's choice
-        else if (game_logic->getState() != GameState::Playing) {
+        // when the game is over wait for the transition
+        else if (transition_state > EndingTransitionSequence::None && transition_state < EndingTransitionSequence::ShowingMenu) {}
+
+        // when user selects between "Play Again" and "Exit"
+        else if (transition_state == EndingTransitionSequence::ShowingMenu) {
             if (auto* mouse = event->getIf<sf::Event::MouseButtonPressed>()) {
                 if (mouse->button == sf::Mouse::Button::Left) {
                     // Process move logic here...
@@ -86,7 +111,7 @@ void GameEngine::handleEvents()
             }
         }
 
-        // when mouse button is pressed
+        // when user plays
         else if (auto* mouse = event->getIf<sf::Event::MouseButtonPressed>())
         {
             if (mouse->button == sf::Mouse::Button::Left)
@@ -100,51 +125,21 @@ void GameEngine::handleEvents()
                 // Map the pixel to the current view coordinates
                 sf::Vector2f worldPos = graphics->getWindow().mapPixelToCoords(mouse->position);
 
-
                 int col = static_cast<int>(worldPos.x / cell_w);
                 int row = static_cast<int>(worldPos.y / cell_h);
                 if (col >= 0 && col < 3 && row >= 0 && row < 3) {
                     int index = (row * 3) + col;
                     game_logic->move(index);
+                    if (game_logic->getState() != GameState::Playing)
+                    {
+                        updateGameStats();
+                        transition_state = EndingTransitionSequence::DrawingLine;
+                    }
                 }
-
             }
         }
     }
 }
 
-void GameEngine::updateGameStats(GameState state) 
-{
-    game_logic->incrementGamesPlayed();
-    switch (state) {
-        case GameState::X_Wins:
-        {
-            player_x->incrementWins();
-        }
-        case GameState::O_Wins:
-        {
-            player_o->incrementWins();
-        }
-        default:
-            break;
-    }
-}
 
-void GameEngine::updateEndSequence(float dt, GameState state) {
-    if (endStage == EndSequence::None) endStage = EndSequence::DrawingLine;
 
-    switch (endStage) {
-        case EndSequence::DrawingLine:
-            lineProgress += dt * 2.0f;
-            if (lineProgress >= 1.0f) {
-                lineProgress = 1.0f;
-                timer += dt;
-                if (timer > 0.5f) { endStage = EndSequence::ShowingMessage; timer = 0.0f; }
-            }
-            break;
-        case EndSequence::ShowingMessage:
-            timer += dt;
-            if (timer > 1.5f) endStage = EndSequence::ShowingMenu;
-            break;
-    }
-}
