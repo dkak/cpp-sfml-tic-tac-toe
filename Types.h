@@ -1,24 +1,27 @@
 #pragma once
+
+#include <SFML/Graphics.hpp>
 #include <string>
 
-// 1. Enums
-enum class GameState { Playing, X_Wins, O_Wins, Draw };
+enum class GameState { Playing, Draw, X_Wins, O_Wins };
 enum class EndingTransitionSequence { None, DrawingLine, ShowingMessage, ShowingMenu };
 
-
-struct WinInfo {
+struct WinInfo 
+{
     bool is_completed = false;
     int positions[3];
 };
 
-struct GameStats{
+struct GameStatistics
+{
     int wins_x = 0;
     int wins_o = 0;
     int draws = 0;
     int total_games = 0;
 };
 
-struct Clickable {
+struct Clickable 
+{
     std::string id;
     float x, y, width, height;
 
@@ -38,17 +41,17 @@ struct Clickable {
 };
 
 // 2. Constants
-namespace Config {
-
+namespace Config 
+{
     // Board dimensions
     const int BOARD_SIZE = 9;
     const char SYMBOL_X = 'X';
     const char SYMBOL_O = 'O';
-    const int WINNING_COMB[8][3] = {
-                            {0,1,2},{0,3,6},{0,4,8},
-                            {1,4,7},{2,4,6},{2,5,8},
-                            {3,4,5},{6,7,8}
-    };
+    const int WINNING_COMBINATIONS[8][3] =  {
+                                        {0,1,2},{0,3,6},{0,4,8},
+                                        {1,4,7},{2,4,6},{2,5,8},
+                                        {3,4,5},{6,7,8}
+                                    };
 
     // Symbols colors
     const sf::Color X_COLOR = sf::Color(170, 255, 0);

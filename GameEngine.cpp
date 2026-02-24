@@ -8,39 +8,40 @@
 GameEngine::GameEngine()
 {
     this->graphics=new Graphics();
-    this->game_logic = new Game();
+    this->game = new Game();
     this->transition_state= EndingTransitionSequence::None;
     transition_timer = 0.0f;
-
 }
 
 GameEngine::~GameEngine()
 {
     delete this->graphics;
     this->graphics = nullptr;
-    delete this->game_logic;
-    this->game_logic = nullptr;
+    delete this->game;
+    this->game = nullptr;
 }
 
 void GameEngine::updateGameStats()
 {
-    game_logic->updateGameStats();
+    game->updateGameStats();
 }
 
-void GameEngine::updateTransition(float dt) {
-
+void GameEngine::updateTransition(float dt) 
+{
     if (transition_state == EndingTransitionSequence::None) return;
 
     transition_timer += dt;
     switch (transition_state) {
         case EndingTransitionSequence::DrawingLine:
-            if (transition_timer >= 0.5f) {
+            if (transition_timer >= 0.5f) 
+            {
                 transition_state = EndingTransitionSequence::ShowingMessage;
                 transition_timer = 0.0f;
             }
             break;
         case EndingTransitionSequence::ShowingMessage:
-            if (transition_timer >= 1.0f) {
+            if (transition_timer >= 1.0f) 
+            {
                 transition_state = EndingTransitionSequence::ShowingMenu;
                 transition_timer = 0.0f;
             }
@@ -50,40 +51,19 @@ void GameEngine::updateTransition(float dt) {
     }
 }
 
-void GameEngine::run() {
-    
-    sf::Clock clock;
-    bool stats_updated = false;
-    
-    // while window is still open
-    while (graphics->getWindow().isOpen())
-    {
-        float dt = clock.restart().asSeconds();
-        
-        // handle events
-        handleEvents();
-
-        // handle the closing animation logic
-        updateTransition(dt);
-
-        clickable_parts=graphics->render(game_logic->getBoardArray(), game_logic->getState(), transition_state, transition_timer,game_logic->getGameStats(),game_logic->getWinInfo());
-        
-    }
-}
-
 void GameEngine::handleEvents()
 {
     while (std::optional event = graphics->getWindow().pollEvent())
     {
         // when close button is clicked
-        if (event->is<sf::Event::Closed>())
+        if (event->is<sf::Event::Closed>()) 
         {
             // close window
-            graphics->getWindow().close();
+            graphics->getWindow().close(); 
         }
 
         // when window is resized
-        else if (event->is <sf::Event::Resized>())
+        else if (event->is <sf::Event::Resized>()) 
         {
             // update view
             sf::View view(sf::FloatRect({ 0.f, 0.f }, sf::Vector2f(graphics->getWindow().getSize())));
@@ -101,12 +81,12 @@ void GameEngine::handleEvents()
                     sf::Vector2f worldPos = graphics->getWindow().mapPixelToCoords(mouse->position);
 
                     for (const auto& area : clickable_parts) {
-                        if (area.contains(worldPos.x, worldPos.y) && area.id=="play_again_button") 
+                        if (area.contains(worldPos.x, worldPos.y) && area.id == "play_again_button")
                         {
-                            game_logic->initializeGame();
+                            game->initializeGame();
                             transition_state = EndingTransitionSequence::None;
                         }
-                        else if(area.contains(worldPos.x, worldPos.y) && area.id == "exit_button")
+                        else if (area.contains(worldPos.x, worldPos.y) && area.id == "exit_button")
                         {
                             graphics->getWindow().close();
                         }
@@ -131,10 +111,11 @@ void GameEngine::handleEvents()
 
                 int col = static_cast<int>(worldPos.x / cell_w);
                 int row = static_cast<int>(worldPos.y / cell_h);
-                if (col >= 0 && col < 3 && row >= 0 && row < 3) {
+                if (col >= 0 && col < 3 && row >= 0 && row < 3) 
+                {
                     int index = (row * 3) + col;
-                    game_logic->move(index);
-                    if (game_logic->getState() != GameState::Playing)
+                    game->move(index);
+                    if (game->getState() != GameState::Playing)
                     {
                         updateGameStats();
                         transition_state = EndingTransitionSequence::DrawingLine;
@@ -144,6 +125,26 @@ void GameEngine::handleEvents()
         }
     }
 }
+
+void GameEngine::run() {
+    
+    sf::Clock clock;
+    
+    // while window is still open
+    while (graphics->getWindow().isOpen())
+    {
+        float dt = clock.restart().asSeconds();
+        
+        // handle events
+        handleEvents();
+
+        // handle the closing animation logic
+        updateTransition(dt);
+
+        clickable_parts=graphics->render(game->getBoardArray(), game->getState(), transition_state, game->getGameStatistics(), game->getWinInfo());
+    }
+}
+
 
 
 

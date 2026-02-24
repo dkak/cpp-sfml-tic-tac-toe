@@ -2,26 +2,25 @@
 #include <iostream>
 
 #include "Game.h"
-#include "Graphics.h"
 #include "Types.h"
 
 class Game {
 private:
     char board[Config::BOARD_SIZE];
     char symbol;
-    GameStats game_stats;
+    GameStatistics game_stats;
     WinInfo win_info;
 
+    bool isTie();
+    bool hasWon(char symbol);
 public:
     Game();
     char* getBoardArray();
-    GameStats getGameStats();
-    WinInfo getWinInfo();
-    void updateGameStats();
-    void initializeGame();
-    bool hasWon(char symbol);
-    bool isTie();
+    GameStatistics getGameStatistics();
     GameState getState();
+    WinInfo getWinInfo();
+    
+    void initializeGame();
+    void updateGameStats();
     void move(int position);
-
 };
