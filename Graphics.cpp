@@ -7,11 +7,7 @@
 
 Graphics::Graphics()
 	: window(sf::VideoMode({ Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT }), "Tic Tac Toe")
-{
-	//if (!graphics_font.openFromMemory(ARIAL_FONT_DATA, sizeof(ARIAL_FONT_DATA))) {
-	//	std::cerr << "Memory load failed!" << std::endl;
-	//}
-	 
+{	 
 	if (!graphics_font.openFromFile("arial.ttf")) {
 		std::cout << "Error loading font!" << std::endl;
 	}
@@ -218,12 +214,12 @@ void Graphics::drawMenu(float window_w,float window_h,GameStats game_stats)
 	window.draw(text_stats_draws);
 
 	// Draw the buttons
-	drawButton("PLAY AGAIN", { window_w * 0.35f, window_h * 0.6f }, sf::Color::Green);
-	drawButton("EXIT", { window_w * 0.65f, window_h * 0.6f }, sf::Color::Red);
+	clickable_parts.push_back(drawButton("PLAY AGAIN", { window_w * 0.35f, window_h * 0.6f }, sf::Color::Green,"play_again_button"));
+	clickable_parts.push_back(drawButton("EXIT", { window_w * 0.65f, window_h * 0.6f }, sf::Color::Red,"exit_button"));
 
 }
 
-void Graphics::drawButton(std::string label, sf::Vector2f position, sf::Color color) {
+Clickable Graphics::drawButton(std::string label, sf::Vector2f position, sf::Color color,std::string clickable_id) {
 	float btnWidth = 180.0f;
 	float btnHeight = 60.0f;
 
@@ -234,6 +230,7 @@ void Graphics::drawButton(std::string label, sf::Vector2f position, sf::Color co
 	box.setOutlineColor(sf::Color::White);
 	box.setOrigin({ btnWidth / 2.0f, btnHeight / 2.0f });
 	box.setPosition(position);
+	window.draw(box);
 
 	// The Button Text
 	sf::Font font;
@@ -244,6 +241,7 @@ void Graphics::drawButton(std::string label, sf::Vector2f position, sf::Color co
 	statusText.setString(label);
 	statusText.setCharacterSize(20);
 	statusText.setFillColor(sf::Color::White);
+	statusText.setStyle(sf::Text::Style::Bold);
 
 	// Correct SFML 3.0 centering
 	auto bounds = statusText.getLocalBounds();
@@ -252,10 +250,11 @@ void Graphics::drawButton(std::string label, sf::Vector2f position, sf::Color co
 	statusText.setPosition(position);
 	window.draw(statusText);
 
-	window.draw(box);
+	
+	return { clickable_id,position.x,position.y,btnWidth,btnHeight };
 }
 
-void Graphics::render(const char* board, GameState game_state, EndingTransitionSequence transition_state, float timer,GameStats game_stats,WinInfo win_info)
+std::vector<Clickable> Graphics::render(const char* board, GameState game_state, EndingTransitionSequence transition_state, float timer,GameStats game_stats,WinInfo win_info)
 {
 
 	// size of window
@@ -316,4 +315,6 @@ void Graphics::render(const char* board, GameState game_state, EndingTransitionS
 	}
 
 	this->display();
+
+	return clickable_parts;
 }

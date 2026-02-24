@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 // 1. Enums
 enum class GameState { Playing, X_Wins, O_Wins, Draw };
@@ -15,6 +16,25 @@ struct GameStats{
     int wins_o = 0;
     int draws = 0;
     int total_games = 0;
+};
+
+struct Clickable {
+    std::string id;
+    float x, y, width, height;
+
+    bool contains(float mouseX, float mouseY) const {
+        // 1. Calculate the Top-Left corner (because Rects start there)
+        sf::Vector2f topLeft(x - (width / 2.0f), y - (height / 2.0f));
+
+        // 2. Define the Size
+        sf::Vector2f size(width, height);
+
+        // 3. Create the Rect (In SFML 3, this takes two vectors)
+        sf::FloatRect bounds(topLeft, size);
+
+        // 4. Perform the check
+        return bounds.contains({ mouseX, mouseY });
+    }
 };
 
 // 2. Constants

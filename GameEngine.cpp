@@ -15,6 +15,7 @@ GameEngine::GameEngine(Player* player_x, Player* player_o)
     this->game_logic = new Game();
     this->transition_state= EndingTransitionSequence::None;
     transition_timer = 0.0f;
+
 }
 
 GameEngine::~GameEngine()
@@ -73,7 +74,7 @@ void GameEngine::run() {
         // handle the closing animation logic
         updateTransition(dt);
 
-        graphics->render(game_logic->getBoardArray(), game_logic->getState(), transition_state, transition_timer,game_logic->getGameStats(),game_logic->getWinInfo());
+        clickable_parts=graphics->render(game_logic->getBoardArray(), game_logic->getState(), transition_state, transition_timer,game_logic->getGameStats(),game_logic->getWinInfo());
         
     }
 }
@@ -104,9 +105,20 @@ void GameEngine::handleEvents()
         else if (transition_state == EndingTransitionSequence::ShowingMenu) {
             if (auto* mouse = event->getIf<sf::Event::MouseButtonPressed>()) {
                 if (mouse->button == sf::Mouse::Button::Left) {
-                    // Process move logic here...
-                    // processMove(mouse->position);
-                    std::cout << "Game Over";
+
+                    sf::Vector2f worldPos = graphics->getWindow().mapPixelToCoords(mouse->position);
+
+                    for (const auto& area : clickable_parts) {
+                        if (area.contains(worldPos.x, worldPos.y) && area.id=="play_again_button") 
+                        {
+                            game_logic->initializeGame();
+                            transition_state = EndingTransitionSequence::None;
+                        }
+                        else if(area.contains(worldPos.x, worldPos.y) && area.id == "exit_button")
+                        {
+                            graphics->getWindow().close();
+                        }
+                    }
                 }
             }
         }

@@ -12,6 +12,8 @@ private:
     Player* player_o;
     EndingTransitionSequence transition_state;
     float transition_timer;
+    std::vector<Clickable> clickable_parts;
+
 
     void updateGameStats();
     void updateTransition(float dt);
