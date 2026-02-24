@@ -233,10 +233,6 @@ Clickable Graphics::drawButton(std::string label, sf::Vector2f position, sf::Col
 	window.draw(box);
 
 	// The Button Text
-	sf::Font font;
-	if (!font.openFromMemory(ARIAL_FONT_DATA, sizeof(ARIAL_FONT_DATA))) {
-		std::cerr << "Memory load failed!" << std::endl;
-	}
 	sf::Text statusText(graphics_font);
 	statusText.setString(label);
 	statusText.setCharacterSize(20);

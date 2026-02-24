@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "Types.h"
-#include "FontData.h"
 
 class Graphics {
     private:

@@ -76,6 +76,14 @@ void Game::move(int position)
         board[position] = symbol;
         symbol = symbol == Config::SYMBOL_X ? Config::SYMBOL_O : Config::SYMBOL_X;
     }
+
+    /*
+        do {
+            srand(time(NULL));
+            position = (rand() % 9);   // generate numbers between 0-8
+        } while (board[position] != ' ');
+        board[position] = this->getSymbol();
+    */
 }
 
 GameStats Game::getGameStats() 

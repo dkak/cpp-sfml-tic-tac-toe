@@ -2,15 +2,11 @@
 #include <iostream>
 
 #include "GameEngine.h"
-#include "Human.h"
-#include "Computer.h"
 #include "Graphics.h"
 
 
-GameEngine::GameEngine(Player* player_x, Player* player_o)
+GameEngine::GameEngine()
 {
-    this->player_x = player_x;
-    this->player_o = player_o;
     this->graphics=new Graphics();
     this->game_logic = new Game();
     this->transition_state= EndingTransitionSequence::None;
@@ -20,10 +16,6 @@ GameEngine::GameEngine(Player* player_x, Player* player_o)
 
 GameEngine::~GameEngine()
 {
-    delete this->player_x;
-    this->player_x = nullptr;
-    delete this->player_o;
-    this->player_o = nullptr;
     delete this->graphics;
     this->graphics = nullptr;
     delete this->game_logic;

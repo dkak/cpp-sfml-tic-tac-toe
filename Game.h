@@ -2,9 +2,6 @@
 #include <iostream>
 
 #include "Game.h"
-#include "Player.h"
-#include "Human.h"
-#include "Computer.h"
 #include "Graphics.h"
 #include "Types.h"
 

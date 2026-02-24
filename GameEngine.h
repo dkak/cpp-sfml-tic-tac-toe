@@ -8,8 +8,6 @@ class GameEngine {
 private:
     Graphics* graphics;
     Game* game_logic;
-    Player* player_x;
-    Player* player_o;
     EndingTransitionSequence transition_state;
     float transition_timer;
     std::vector<Clickable> clickable_parts;
@@ -20,7 +18,7 @@ private:
     void handleEvents();
     
 public:
-    GameEngine(Player* player_x, Player* player_o);
+    GameEngine();
     ~GameEngine();
     void run();
 };
