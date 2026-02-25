@@ -53,85 +53,66 @@ void GameEngine::updateTransition(float dt)
 
 void GameEngine::handleResize()
 {
-    
     // update view
     sf::View view(sf::FloatRect({ 0.f, 0.f }, sf::Vector2f(graphics->getWindow().getSize())));
     graphics->getWindow().setView(view);
 
     sf::Vector2f vSize = graphics->getWindow().getView().getSize();
-    // Get the layout
     clickable_parts = graphics->calculateLayout(vSize.x, vSize.y);
 }
 
-void GameEngine::handleLeftMouseClick(sf::Vector2i mouse_position,GameTransitionSequence transition_state)
-{
-    // when the game is over wait for the ui transitions
+void GameEngine::handleLeftMouseClick(sf::Vector2i mouse_position)
+{  
     if (transition_state > GameTransitionSequence::Playing && transition_state < GameTransitionSequence::FinalMenu) return;
 
-    if (transition_state == GameTransitionSequence::StartingMenu)
-    {
-        sf::Vector2f worldPos = graphics->getWindow().mapPixelToCoords(mouse_position);
+    // map the pixel to the current view coordinates
+    sf::Vector2f world_pos = graphics->getWindow().mapPixelToCoords(mouse_position);
 
-        for (const auto& area : clickable_parts) {
-            if (area.contains(worldPos.x, worldPos.y) && area.id == "single_player_button")
-            {
-                std::cout << "Singleplayer";
+    switch (transition_state) {
+        case GameTransitionSequence::StartingMenu:
+            for (const auto& area : clickable_parts) {
+                if (area.contains(world_pos.x, world_pos.y) && area.id == "single_player_button")
+                {
+                    game->initializeGame();
+                    transition_state = GameTransitionSequence::Playing;
+                }
+                else if (area.contains(world_pos.x, world_pos.y) && area.id == "multiplayer_button")
+                {
+                    game->initializeGame();
+                    transition_state = GameTransitionSequence::Playing;
+                }
+                else if (area.contains(world_pos.x, world_pos.y) && area.id == "exit_button")
+                {
+                    graphics->closeWindow();
+                }
             }
-            else if (area.contains(worldPos.x, worldPos.y) && area.id == "multiplayer_button")
+            break;
+        case GameTransitionSequence::Playing:
+            if (game->getGameType() == GameType::Singleplayer && game->getSymbol()=='O')
             {
-                std::cout << "Multiplayer";
-                game->initializeGame();
-                transition_state = GameTransitionSequence::Playing;
+                computerAction();
             }
-            else if (area.contains(worldPos.x, worldPos.y) && area.id == "exit_button")
+            else 
             {
-                graphics->closeWindow();
+                userAction(world_pos);
             }
-        }
-    }
-
-    // user playing
-    else if (transition_state == GameTransitionSequence::Playing)
-    {
-        // get the current size of the view
-        sf::Vector2f viewSize = graphics->getWindow().getView().getSize();
-
-        float cell_w = viewSize.x / 3.0f;
-        float cell_h = viewSize.y / 3.0f;
-
-        // Map the pixel to the current view coordinates
-        sf::Vector2f worldPos = graphics->getWindow().mapPixelToCoords(mouse_position);
-
-        int col = static_cast<int>(worldPos.x / cell_w);
-        int row = static_cast<int>(worldPos.y / cell_h);
-        if (col >= 0 && col < 3 && row >= 0 && row < 3)
-        {
-            int index = (row * 3) + col;
-            game->move(index);
-            if (game->getState() != GameState::Playing)
-            {
-                updateGameStats();
-                transition_state = GameTransitionSequence::DrawingLine;
+            break;
+        case GameTransitionSequence::FinalMenu:
+            for (const auto& area : clickable_parts) {
+                if (area.contains(world_pos.x, world_pos.y) && area.id == "play_again_button")
+                {
+                    game->restartGame();
+                    transition_state = GameTransitionSequence::Playing;
+                }
+                else if (area.contains(world_pos.x, world_pos.y) && area.id == "main_menu_button")
+                {
+                    game->initializeGame();
+                    transition_state = GameTransitionSequence::StartingMenu;
+                }
             }
-        }
-    }
-
-    // final menu
-    else if (transition_state == GameTransitionSequence::FinalMenu) 
-    {
-        sf::Vector2f worldPos = graphics->getWindow().mapPixelToCoords(mouse_position);
-
-        for (const auto& area : clickable_parts) {
-            if (area.contains(worldPos.x, worldPos.y) && area.id == "play_again_button")
-            {
-                game->initializeGame();
-                transition_state = GameTransitionSequence::Playing;
-            }
-            else if (area.contains(worldPos.x, worldPos.y) && area.id == "exit_button")
-            {
-                graphics->closeWindow();
-            }
-        }
+            break;
+        default:
+            break;
     }
 }
 
@@ -139,6 +120,7 @@ void GameEngine::handleEvents()
 {
     while (std::optional event = graphics->getWindow().pollEvent())
     {
+
         // when close button is clicked
         if (event->is<sf::Event::Closed>()) 
         {
@@ -151,12 +133,17 @@ void GameEngine::handleEvents()
             handleResize();
         }
 
+        else if(transition_state==GameTransitionSequence::Playing && game->getGameType()==GameType::Singleplayer && game->getSymbol()==Config::SYMBOL_O)
+        {
+            computerAction();
+        }
+
         // when user clicks left button
         else if (auto* mouse = event->getIf<sf::Event::MouseButtonPressed>()) 
         {
             if (mouse->button == sf::Mouse::Button::Left) 
             {
-                handleLeftMouseClick(mouse->position,transition_state);   
+                handleLeftMouseClick(mouse->position);   
             }
         }
     }
@@ -180,6 +167,29 @@ void GameEngine::run()
     }
 }
 
+void GameEngine::userAction(sf::Vector2f world_pos)
+{
+    // get the current size of the view
+    sf::Vector2f viewSize = graphics->getWindow().getView().getSize();
 
+    float cell_w = viewSize.x / 3.0f;
+    float cell_h = viewSize.y / 3.0f;
 
+    int col = static_cast<int>(world_pos.x / cell_w);
+    int row = static_cast<int>(world_pos.y / cell_h);
+    if (col >= 0 && col < 3 && row >= 0 && row < 3)
+    {
+        int index = (row * 3) + col;
+        game->move(index);
+        if (game->getState() != GameState::Playing)
+        {
+            updateGameStats();
+            transition_state = GameTransitionSequence::DrawingLine;
+        }
+    }
+}
 
+void GameEngine::computerAction()
+{
+    game->move();
+}

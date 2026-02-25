@@ -12,6 +12,11 @@ char* Game::getBoardArray()
     return board;
 }
 
+char Game::getSymbol()
+{
+    return symbol;
+}
+
 bool Game::isTie()
 {
     if (hasWon(Config::SYMBOL_X) || hasWon(Config::SYMBOL_O)) return false;
@@ -53,7 +58,18 @@ WinInfo Game::getWinInfo()
     return win_info;
 }
 
-void Game::initializeGame()
+GameType Game::getGameType()
+{
+    return this->game_type;
+}
+
+void Game::setGameType(GameType type)
+{
+    game_type = type;
+}
+
+// play again
+void Game::restartGame()
 {
     symbol = Config::SYMBOL_X;
     for (int i = 0; i < Config::BOARD_SIZE; i++) {
@@ -61,11 +77,23 @@ void Game::initializeGame()
     }
 }
 
+// start new game
+void Game::initializeGame()
+{
+    restartGame();
+    resetGameStats();
+}
+
+void Game::resetGameStats()
+{
+    game_stats.wins_x = 0;
+    game_stats.wins_o = 0;
+    game_stats.draws = 0;
+}
+
 void Game::updateGameStats() 
 {
     if (getState() == GameState::Playing) return;
-
-    game_stats.total_games++;
 
     switch (getState()) {
         case GameState::X_Wins:
@@ -87,14 +115,17 @@ void Game::move(int position)
         board[position] = symbol;
         symbol = symbol == Config::SYMBOL_X ? Config::SYMBOL_O : Config::SYMBOL_X;
     }
+}
 
-    /*
-        do {
-            srand(time(NULL));
-            position = (rand() % 9);   // generate numbers between 0-8
-        } while (board[position] != ' ');
-        board[position] = this->getSymbol();
-    */
+void Game::move()
+{
+    int position;
+    do {
+        srand(time(NULL));
+        position = (rand() % 9);   // generate numbers between 0-8
+    } while (board[position] != ' ');
+    board[position] = symbol;
+    symbol = symbol == Config::SYMBOL_X ? Config::SYMBOL_O : Config::SYMBOL_X;
 }
 
 

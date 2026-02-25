@@ -14,9 +14,13 @@ private:
 
     void updateGameStats();
     void updateTransition(float dt);
+    
     void handleResize();
-    void handleLeftMouseClick(sf::Vector2i mouse_position, GameTransitionSequence transition_state);
+    void handleLeftMouseClick(sf::Vector2i mouse_positione);
     void handleEvents();
+
+    void computerAction();
+    void userAction(sf::Vector2f world_pos);
 public:
     GameEngine();
     ~GameEngine();

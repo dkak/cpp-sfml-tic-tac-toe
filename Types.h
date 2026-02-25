@@ -17,7 +17,6 @@ struct GameStatistics
     int wins_x = 0;
     int wins_o = 0;
     int draws = 0;
-    int total_games = 0;
 };
 
 struct Clickable 

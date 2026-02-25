@@ -1,6 +1,5 @@
 #include "Graphics.h"
 
-
 #include <iostream>
 #include <string>
 #include <cmath>
@@ -195,7 +194,7 @@ void Graphics::drawStartingMenu(float window_w, float window_h, GameStatistics g
 	// draw the stats
 	sf::Text welcome_text(graphics_font);
 	
-	std::string string_message = " Welcome! ";
+	std::string string_message = " Tic Tac Toe ";
 	welcome_text.setString(string_message);
 	welcome_text.setCharacterSize(40);
 	welcome_text.setFillColor(Config::X_COLOR);
@@ -276,7 +275,7 @@ void Graphics::drawFinalMenu(float window_w,float window_h, GameStatistics game_
 
 	// draw the buttons
 	clickable_parts.push_back(drawButton("PLAY AGAIN", { window_w * 0.35f, window_h * 0.6f }, sf::Color::Green,"play_again_button"));
-	clickable_parts.push_back(drawButton("EXIT", { window_w * 0.65f, window_h * 0.6f }, sf::Color::Red,"exit_button"));
+	clickable_parts.push_back(drawButton("MAIN MENU", { window_w * 0.65f, window_h * 0.6f }, sf::Color::Red,"main_menu_button"));
 
 }
 
@@ -325,29 +324,19 @@ std::vector<Clickable> Graphics::render(const char* board, GameState game_state,
 
 	// clear canvas before painting on it
 	this->clear();
-
-	sf::Vector2f vSize = getWindow().getView().getSize();
-	// Get the layout
-	clickable_parts = calculateLayout(vSize.x, vSize.y);
 	
 	// game animations
 	switch (transition_state) {
 		case GameTransitionSequence::StartingMenu:
-		{
 			drawStartingMenu(window_w, window_h, game_stats);
 			break;
-		}
 		case GameTransitionSequence::Playing:
-		{
 			drawGrid(space, width / 4, window_w / 2, window_h / 2);
 			drawBoard(board, size, width);
 			break;
-		}
 		case GameTransitionSequence::DrawingLine:
-		{
 			drawGrid(space, width / 4, window_w / 2, window_h / 2);
 			drawBoard(board, size, width);
-
 			if (win_info.positions[0] + 2 == win_info.positions[2]) // Horizontal
 			{
 
@@ -366,19 +355,14 @@ std::vector<Clickable> Graphics::render(const char* board, GameState game_state,
 				drawWinningLine(space * 3, width / 2, window_w / 2, window_h / 2, -45.f, 1.4f, game_state);
 			}
 			break;
-		}
 		case GameTransitionSequence::ResultMessage:
-		{
 			drawGrid(space, width / 4, window_w / 2, window_h / 2);
 			drawBoard(board, size, width);
 			drawMessage(game_state);
 			break;
-		}
 		case GameTransitionSequence::FinalMenu:
-		{
 			drawFinalMenu(window_w, window_h, game_stats);
 			break;
-		}
 		default:
 			break;
 	}
