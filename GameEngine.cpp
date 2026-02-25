@@ -33,7 +33,7 @@ void GameEngine::updateTransition(float dt)
     transition_timer += dt;
     switch (transition_state) {
         case GameTransitionSequence::DrawingLine:
-            if (transition_timer >= 0.5f) 
+            if (transition_timer >= 1.0f) 
             {
                 transition_state = GameTransitionSequence::ResultMessage;
                 transition_timer = 0.0f;
@@ -73,12 +73,12 @@ void GameEngine::handleLeftMouseClick(sf::Vector2i mouse_position)
             for (const auto& area : clickable_parts) {
                 if (area.contains(world_pos.x, world_pos.y) && area.id == "single_player_button")
                 {
-                    game->initializeGame();
+                    game->initializeGame(GameType::Singleplayer);
                     transition_state = GameTransitionSequence::Playing;
                 }
                 else if (area.contains(world_pos.x, world_pos.y) && area.id == "multiplayer_button")
                 {
-                    game->initializeGame();
+                    game->initializeGame(GameType::Multiplayer);
                     transition_state = GameTransitionSequence::Playing;
                 }
                 else if (area.contains(world_pos.x, world_pos.y) && area.id == "exit_button")
@@ -88,14 +88,7 @@ void GameEngine::handleLeftMouseClick(sf::Vector2i mouse_position)
             }
             break;
         case GameTransitionSequence::Playing:
-            if (game->getGameType() == GameType::Singleplayer && game->getSymbol()=='O')
-            {
-                computerAction();
-            }
-            else 
-            {
-                userAction(world_pos);
-            }
+            userAction(world_pos);
             break;
         case GameTransitionSequence::FinalMenu:
             for (const auto& area : clickable_parts) {
@@ -106,7 +99,6 @@ void GameEngine::handleLeftMouseClick(sf::Vector2i mouse_position)
                 }
                 else if (area.contains(world_pos.x, world_pos.y) && area.id == "main_menu_button")
                 {
-                    game->initializeGame();
                     transition_state = GameTransitionSequence::StartingMenu;
                 }
             }
@@ -136,6 +128,11 @@ void GameEngine::handleEvents()
         else if(transition_state==GameTransitionSequence::Playing && game->getGameType()==GameType::Singleplayer && game->getSymbol()==Config::SYMBOL_O)
         {
             computerAction();
+            if (game->getState() != GameState::Playing)
+            {
+                updateGameStats();
+                transition_state = GameTransitionSequence::DrawingLine;
+            }
         }
 
         // when user clicks left button

@@ -25,11 +25,10 @@ public:
     GameStatistics getGameStatistics();
     GameState getState();
     WinInfo getWinInfo();
-    void setGameType(GameType type);
     GameType getGameType();
     
     void restartGame();
-    void initializeGame();
+    void initializeGame(GameType game_type);
     void updateGameStats();
     void move();
     void move(int position);

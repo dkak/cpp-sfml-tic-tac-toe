@@ -2,10 +2,7 @@
 
 #include "Game.h"
 
-Game::Game()
-{
-    this->initializeGame();
-}
+Game::Game() {}
 
 char* Game::getBoardArray()
 {
@@ -63,11 +60,6 @@ GameType Game::getGameType()
     return this->game_type;
 }
 
-void Game::setGameType(GameType type)
-{
-    game_type = type;
-}
-
 // play again
 void Game::restartGame()
 {
@@ -78,8 +70,9 @@ void Game::restartGame()
 }
 
 // start new game
-void Game::initializeGame()
+void Game::initializeGame(GameType game_type)
 {
+    this->game_type = game_type;
     restartGame();
     resetGameStats();
 }
