@@ -4,7 +4,7 @@
 #include <string>
 
 enum class GameState { Playing, Draw, X_Wins, O_Wins };
-enum class EndingTransitionSequence { None, DrawingLine, ShowingMessage, ShowingMenu };
+enum class GameTransitionSequence { StartingMenu, Playing, DrawingLine, ResultMessage, FinalMenu };
 
 struct WinInfo 
 {

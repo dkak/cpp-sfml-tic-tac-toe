@@ -28,6 +28,33 @@ void Graphics::clear()
 	window.clear(sf::Color::White);
 }
 
+void Graphics::closeWindow()
+{
+	window.close();
+}
+
+std::vector<Clickable> Graphics::calculateLayout(float window_w, float window_h)
+{
+	std::vector<Clickable> current_clicks;
+
+	float centerX = window_w * 0.5f;
+	float startY = window_h * 0.4f;
+	float spacing = 80.0f;
+	float btnW = 180.0f;
+	float btnH = 60.0f;
+
+	// Single-Player
+	current_clicks.push_back({ "single_player_button", centerX - (btnW / 2.0f), startY - (btnH / 2.0f), btnW, btnH });
+
+	// Multi-Player
+	current_clicks.push_back({ "multiplayer_button", centerX - (btnW / 2.0f), (startY + spacing) - (btnH / 2.0f), btnW, btnH });
+
+	// Exit
+	current_clicks.push_back({ "exit_button", centerX - (btnW / 2.0f), (startY + 2 * spacing) - (btnH / 2.0f), btnW, btnH });
+
+	return current_clicks;
+}
+
 void Graphics::drawGrid(float space, float width, float position_x, float position_y)
 {	
 	// create the lines
@@ -156,7 +183,42 @@ void Graphics::drawMessage(GameState game_state)
 	window.draw(graphics_text);
 }
 
-void Graphics::drawMenu(float window_w,float window_h, GameStatistics game_stats)
+void Graphics::drawStartingMenu(float window_w, float window_h, GameStatistics game_stats)
+{
+	// draw the dark dverlay
+	sf::RectangleShape overlay;
+	overlay.setSize(sf::Vector2f(window.getSize()));
+	overlay.setPosition({ 0, 0 });
+	overlay.setFillColor(sf::Color(0, 0, 0, 250));
+	window.draw(overlay);
+
+	// draw the stats
+	sf::Text welcome_text(graphics_font);
+	
+	std::string string_message = " Welcome! ";
+	welcome_text.setString(string_message);
+	welcome_text.setCharacterSize(40);
+	welcome_text.setFillColor(Config::X_COLOR);
+
+	// calculate positioning of the stats
+	sf::FloatRect bounds = welcome_text.getLocalBounds();
+	welcome_text.setOrigin({
+		bounds.position.x + (bounds.size.x / 2.0f),
+		bounds.position.y + (bounds.size.y / 2.0f)
+		});
+	welcome_text.setPosition({ window_w / 2.0f, window_h * 0.1f });
+
+	window.draw(welcome_text);
+
+	float spacing = 80.0f;
+
+	// draw the buttons
+	clickable_parts.push_back(drawButton("Single-Player", { window_w * 0.5f, window_h * 0.4f }, sf::Color::Green, "single_player_button"));
+	clickable_parts.push_back(drawButton("Multi-Player", { window_w * 0.5f, window_h*0.4f +spacing }, sf::Color::Blue, "multiplayer_button"));
+	clickable_parts.push_back(drawButton("Exit", { window_w * 0.5f, window_h * 0.4f + 2 * spacing }, sf::Color::Red, "exit_button"));
+}
+
+void Graphics::drawFinalMenu(float window_w,float window_h, GameStatistics game_stats)
 {
 	// draw the dark dverlay
 	sf::RectangleShape overlay;
@@ -246,10 +308,10 @@ Clickable Graphics::drawButton(std::string label, sf::Vector2f position, sf::Col
 	statusText.setPosition(position);
 	window.draw(statusText);
 
-	return { clickable_id,position.x,position.y,btnWidth,btnHeight };
+	return { clickable_id, position.x, position.y, btnWidth, btnHeight };
 }
 
-std::vector<Clickable> Graphics::render(const char* board, GameState game_state, EndingTransitionSequence transition_state, GameStatistics game_stats,WinInfo win_info)
+std::vector<Clickable> Graphics::render(const char* board, GameState game_state, GameTransitionSequence transition_state, GameStatistics game_stats,WinInfo win_info)
 {
 	// size of window
 	float window_w = window.getView().getSize().x;
@@ -264,52 +326,64 @@ std::vector<Clickable> Graphics::render(const char* board, GameState game_state,
 	// clear canvas before painting on it
 	this->clear();
 
-	// paint the grid
-	this->drawGrid(space, width / 4, window_w / 2, window_h / 2);
-
-	this->drawBoard(board, size, width);
-
-	if (game_state != GameState::Playing) 
-	{
-		// game over scenarios
-		switch (transition_state) {
-			case EndingTransitionSequence::DrawingLine:
-			{
-				if (win_info.positions[0] + 2 == win_info.positions[2]) // Horizontal
-				{
-
-					drawWinningLine(space * 3, width / 2, window_w / 2, window_h / 2 + 200.f * (win_info.positions[0]/3 - 1 ), 0.f, 1.f,game_state);
-				}
-				else if(win_info.positions[0] + 6 == win_info.positions[2]) // Vertical
-				{
-					drawWinningLine(space * 3, width / 2, window_w / 2 + 200.f * (win_info.positions[0] % 3 - 1), window_h / 2, 90.f,1.f, game_state);
-				}
-				else if(win_info.positions[0] + 8 == win_info.positions[2]) // Diagonal 1
-				{
-					 drawWinningLine(space*3, width/2 , window_w/2, window_h/2, 45.f, 1.4f, game_state);
-				}
-				else // Diagonal 2
-				{
-					drawWinningLine(space * 3, width / 2, window_w / 2, window_h / 2, -45.f, 1.4f, game_state);
-				}
-				break;
-			}
-			case EndingTransitionSequence::ShowingMessage:
-			{
-				drawMessage(game_state);
-				break;
-			}
-			case EndingTransitionSequence::ShowingMenu:
-			{
-				drawMenu(window_w, window_h, game_stats);
-				break;
-			}
-			default:
-				break;
-			}
+	sf::Vector2f vSize = getWindow().getView().getSize();
+	// Get the layout
+	clickable_parts = calculateLayout(vSize.x, vSize.y);
+	
+	// game animations
+	switch (transition_state) {
+		case GameTransitionSequence::StartingMenu:
+		{
+			drawStartingMenu(window_w, window_h, game_stats);
+			break;
 		}
+		case GameTransitionSequence::Playing:
+		{
+			drawGrid(space, width / 4, window_w / 2, window_h / 2);
+			drawBoard(board, size, width);
+			break;
+		}
+		case GameTransitionSequence::DrawingLine:
+		{
+			drawGrid(space, width / 4, window_w / 2, window_h / 2);
+			drawBoard(board, size, width);
 
-	this->display();
+			if (win_info.positions[0] + 2 == win_info.positions[2]) // Horizontal
+			{
+
+				drawWinningLine(space * 3, width / 2, window_w / 2, window_h / 2 + 200.f * (win_info.positions[0]/3 - 1 ), 0.f, 1.f,game_state);
+			}
+			else if(win_info.positions[0] + 6 == win_info.positions[2]) // Vertical
+			{
+				drawWinningLine(space * 3, width / 2, window_w / 2 + 200.f * (win_info.positions[0] % 3 - 1), window_h / 2, 90.f,1.f, game_state);
+			}
+			else if(win_info.positions[0] + 8 == win_info.positions[2]) // Diagonal 1
+			{
+					drawWinningLine(space*3, width/2 , window_w/2, window_h/2, 45.f, 1.4f, game_state);
+			}
+			else // Diagonal 2
+			{
+				drawWinningLine(space * 3, width / 2, window_w / 2, window_h / 2, -45.f, 1.4f, game_state);
+			}
+			break;
+		}
+		case GameTransitionSequence::ResultMessage:
+		{
+			drawGrid(space, width / 4, window_w / 2, window_h / 2);
+			drawBoard(board, size, width);
+			drawMessage(game_state);
+			break;
+		}
+		case GameTransitionSequence::FinalMenu:
+		{
+			drawFinalMenu(window_w, window_h, game_stats);
+			break;
+		}
+		default:
+			break;
+	}
+	
+	display();
 
 	return clickable_parts;
 }
