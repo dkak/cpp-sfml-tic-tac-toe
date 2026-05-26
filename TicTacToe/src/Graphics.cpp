@@ -7,7 +7,7 @@
 Graphics::Graphics()
 	: window(sf::VideoMode({ Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT }), "Tic Tac Toe")
 {	 
-	if (!graphics_font.openFromFile("arial.ttf")) {
+	if (!graphics_font.openFromFile("..\assets\arial.ttf")) {
 		std::cout << "Error loading font!" << std::endl;
 	}
 }
