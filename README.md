@@ -2,7 +2,7 @@
 
 A graphical Tic-Tac-Toe game built with **C++17** and **SFML 3**. The project features an animated UI transition sequence, support for both **Single-player** and **Multi-player** local game modes, responsive layout scaling, and real-time session tracking.
 
-Developed inside **Visual Studio Code / Visual Studio** using native Windows configurations.
+Developed inside **Visual Studio Code** using native Windows configurations.
 
 ---
 
@@ -23,7 +23,7 @@ Developed inside **Visual Studio Code / Visual Studio** using native Windows con
 
 The codebase relies on a modular OOP design splitting logic, rendering, and engine flow:
 
-- **`Types.h`**: Houses global configurations (`Config` namespace), shared geometric structures (`Clickable` bounding boxes), game tracking structures (`WinInfo`, `GameStatistics`), and state definitions (`GameState`, `GameTransitionSequence`).
+- **`Types`**: Houses global configurations (`Config` namespace), shared geometric structures (`Clickable` bounding boxes), game tracking structures (`WinInfo`, `GameStatistics`), and state definitions (`GameState`, `GameTransitionSequence`).
 - **`Game`**: Governs core game rules, winning combinations array tracking, turn handling, and actions.
 - **`Graphics`**: Wraps the SFML window canvas, handles font/text calculations, absolute button coordinate mappings, grid render mechanics, and color profiles.
 - **`GameEngine`**: The orchestrator core driving the primary system loop (`run()`), processing window/mouse events, updating game cycles, and ticking interpolation clocks.
