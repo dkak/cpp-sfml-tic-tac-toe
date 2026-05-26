@@ -28,6 +28,7 @@ The codebase relies on a modular OOP design splitting logic, rendering, and engi
 - **`Graphics`**: Wraps the SFML window canvas, handles font/text calculations, absolute button coordinate mappings, grid render mechanics, and color profiles.
 - **`GameEngine`**: The orchestrator core driving the primary system loop (`run()`), processing window/mouse events, updating game cycles, and ticking interpolation clocks.
 
+```text
 ├── bin/
 │   ├── sfml-graphics-3.dll
 │   ├── sfml-system-3.dll
@@ -48,6 +49,7 @@ The codebase relies on a modular OOP design splitting logic, rendering, and engi
 │   ├── TicTacToe.vcxproj
 │   └── TicTacToe.vcxproj.filters
 └── TicTacToe.sln
+```
 
 ---
 
