@@ -13,7 +13,6 @@ private:
     GameStatistics game_stats;
     WinInfo win_info;
     GameType game_type;
-
     
     void resetGameStats();
     bool isTie();
