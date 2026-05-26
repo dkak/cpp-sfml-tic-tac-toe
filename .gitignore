@@ -1,0 +1,30 @@
+# ==========================================
+# Visual Studio Temporary Files & Folders
+# ==========================================
+.vs/
+Debug/
+Release/
+x64/
+x86/
+ARM/
+ARM64/
+build/
+
+# ==========================================
+# Compiled Object & Build Files
+# ==========================================
+*.obj
+*.ilk
+*.pdb
+*.tlog
+*.lastbuildstate
+*.idb
+*.pch
+
+# ==========================================
+# User-Specific Customization Files
+# ==========================================
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
